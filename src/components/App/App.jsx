@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import helpers from '../../helpers';
 
 import { SearchBar } from '../SearchBar/SearchBar';
@@ -8,34 +8,37 @@ import { Loader } from '../Loader/Loader';
 import { Modal } from '../Modal/Modal';
 
 import { ContainerHTML, ErrorHTML } from './App.styled';
+// import { useRef } from 'react';
 
-export class App extends Component {
-  state = {
-    images: [],
-    query: '',
-    page: 0,
-    isLoading: false,
-    showModal: false,
-    hasMoreImages: false,
-    error: null,
-    largeImageURL: '',
-  };
+export const App = () => {
+  const [images, setImages] = useState([]);
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [hasMoreImages, setHasMoreImages] = useState(false);
+  const [error, setError] = useState(null);
+  const [largeImageURL, setLargeImageURL] = useState('');
 
-  componentDidUpdate(prevProps, prevState) {
-    const { query, page } = this.state;
-    if (prevState.query !== query || prevState.page !== page) {
-      this.fetchImages();
-    }
-  }
+  // const isMounted = useRef(false);
 
-  fetchImages = async () => {
-    const { query, page } = this.state;
+  // useEffect(() => {
+  //   if (isMounted.current) {
+  //     fetchImages(query, page);
+  //   } else {
+  //     isMounted.current = true;
+  //   }
+  // }, [query, page]);
 
-    this.setState({
-      isLoading: true,
-      hasMoreImages: false,
-      error: null,
-    });
+  useEffect(() => {
+    if (!query) return;
+    fetchImages(query, page);
+  }, [query, page]);
+
+  const fetchImages = async (query, page) => {
+    setIsLoading(true);
+    setHasMoreImages(false);
+    setError(null);
 
     try {
       const { hits, totalPages } = await helpers.fetchImages(query, page);
@@ -44,86 +47,60 @@ export class App extends Component {
         throw new Error('No images');
       }
 
-      this.setState(prevState => {
-        return {
-          images: [...prevState.images, ...hits],
-        };
-      });
+      setImages(images => [...images, ...hits]);
 
-      this.setState({ hasMoreImages: page < totalPages });
+      setHasMoreImages(page < totalPages);
     } catch (error) {
-      this.setState({ error: error.message });
+      setError(error.message);
     } finally {
-      this.setState({ isLoading: false });
+      setIsLoading(false);
     }
   };
 
-  handleImageFormSubmit = query => {
+  const handleImageFormSubmit = query => {
     if (query.trim() === '') {
-      this.setState({ error: 'The search field is empty' });
+      setError('The search field is empty');
       return;
     }
 
-    this.setState({
-      images: [],
-      query: query,
-      page: 1,
-      error: null,
-    });
+    setImages([]);
+    setPage(1);
+    setQuery(query);
+    setError(null);
   };
 
-  handleButtonClick = () => {
-    this.setState(({ page }) => ({
-      page: page + 1,
-    }));
+  const handleButtonClick = () => {
+    setPage(page => page + 1);
   };
 
-  handleImageClick = largeImageURL => {
-    this.setState({
-      largeImageURL: largeImageURL,
-      showModal: true,
-    });
+  const handleImageClick = () => {
+    setLargeImageURL(largeImageURL);
+    setShowModal(!showModal);
   };
 
-  handleModalClose = () => {
-    this.setState({
-      showModal: false,
-    });
+  const handleModalClose = () => {
+    setShowModal(showModal);
   };
 
-  render() {
-    const {
-      images,
-      isLoading,
-      showModal,
-      hasMoreImages,
-      error,
-      largeImageURL,
-    } = this.state;
+  return (
+    <ContainerHTML>
+      <SearchBar handleSubmit={handleImageFormSubmit}></SearchBar>
 
-    return (
-      <ContainerHTML>
-        <SearchBar handleSubmit={this.handleImageFormSubmit}></SearchBar>
+      {error && <ErrorHTML>{error}</ErrorHTML>}
 
-        {error && <ErrorHTML>{error}</ErrorHTML>}
+      {isLoading && <Loader />}
 
-        {isLoading && <Loader />}
+      {!error && (
+        <ImageGallery images={images} onClick={handleImageClick}></ImageGallery>
+      )}
 
-        {!error && (
-          <ImageGallery
-            images={images}
-            onClick={this.handleImageClick}
-          ></ImageGallery>
-        )}
+      {hasMoreImages && <Button handleClick={handleButtonClick} />}
 
-        {hasMoreImages && <Button handleClick={this.handleButtonClick} />}
-
-        {showModal && (
-          <Modal onClose={this.handleModalClose}>
-            <img src={largeImageURL} alt="" />
-          </Modal>
-        )}
-      </ContainerHTML>
-    );
-  }
-}
+      {showModal && (
+        <Modal onClose={handleModalClose}>
+          <img src={largeImageURL} alt="" />
+        </Modal>
+      )}
+    </ContainerHTML>
+  );
+};

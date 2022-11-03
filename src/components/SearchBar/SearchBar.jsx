@@ -16,6 +16,11 @@ export const SearchBar = ({ handleSubmit }) => {
     const form = event.currentTarget;
     const query = form.elements.query.value;
 
+    // if (query.trim() === '') {
+    //   alert('The search field is empty');
+    //   return;
+    // }
+
     handleSubmit(query);
     form.reset();
   };
