@@ -5,16 +5,14 @@ import { OverlayHTML, ContentHTML } from './Modal.styled';
 
 const modalRoot = document.querySelector('#modal-root');
 
-export function Modal({ onClose, children }) {
+export const Modal = ({ onClose, children }) => {
   useEffect(() => {
-    console.log('визивається useEffect');
     window.addEventListener('keydown', handleKeyDown);
-    // window.removeEventListener('keydown', handleKeyDown);
+
     return () => {
-      console.log('визивається перед кожним useEffect');
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  });
 
   const handleKeyDown = event => {
     if (event.code === 'Escape') {
@@ -34,7 +32,7 @@ export function Modal({ onClose, children }) {
     </OverlayHTML>,
     modalRoot
   );
-}
+};
 
 Modal.propTypes = {
   onClose: PropTypes.func.isRequired,

@@ -10,3 +10,7 @@ export const ContainerHTML = styled.div`
 export const ErrorHTML = styled.h3`
   text-align: center;
 `;
+
+export const LargeImageHTML = styled.img`
+  display: block;
+`;

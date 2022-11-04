@@ -7,8 +7,7 @@ import { Button } from '../Button/Button';
 import { Loader } from '../Loader/Loader';
 import { Modal } from '../Modal/Modal';
 
-import { ContainerHTML, ErrorHTML } from './App.styled';
-// import { useRef } from 'react';
+import { ContainerHTML, ErrorHTML, LargeImageHTML } from './App.styled';
 
 export const App = () => {
   const [images, setImages] = useState([]);
@@ -19,16 +18,6 @@ export const App = () => {
   const [hasMoreImages, setHasMoreImages] = useState(false);
   const [error, setError] = useState(null);
   const [largeImageURL, setLargeImageURL] = useState('');
-
-  // const isMounted = useRef(false);
-
-  // useEffect(() => {
-  //   if (isMounted.current) {
-  //     fetchImages(query, page);
-  //   } else {
-  //     isMounted.current = true;
-  //   }
-  // }, [query, page]);
 
   useEffect(() => {
     if (!query) return;
@@ -73,13 +62,13 @@ export const App = () => {
     setPage(page => page + 1);
   };
 
-  const handleImageClick = () => {
+  const handleImageClick = largeImageURL => {
     setLargeImageURL(largeImageURL);
-    setShowModal(!showModal);
+    setShowModal(true);
   };
 
   const handleModalClose = () => {
-    setShowModal(showModal);
+    setShowModal(false);
   };
 
   return (
@@ -98,7 +87,7 @@ export const App = () => {
 
       {showModal && (
         <Modal onClose={handleModalClose}>
-          <img src={largeImageURL} alt="" />
+          <LargeImageHTML src={largeImageURL} alt="" />
         </Modal>
       )}
     </ContainerHTML>
